@@ -1,12 +1,23 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        {
+          error: "OPENAI_API_KEY is missing",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
     const body = await req.json();
 
     const messages = body.messages || [];
@@ -56,7 +67,7 @@ Rules:
 
     return NextResponse.json({
       reply:
-        completion.choices[0].message.content ||
+        completion.choices[0].message.content ??
         "No response generated.",
     });
   } catch (error: any) {
